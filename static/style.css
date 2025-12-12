@@ -142,6 +142,10 @@ main {
   gap: 6px;
   margin-bottom: 4px;
 }
+.ctrl-buttons.vertical {
+  flex-direction: column;
+  align-items: center;
+}
 
 .btn {
   background: #243144;
@@ -177,6 +181,10 @@ main {
   height: 54px;
   display: grid;
   place-items: center;
+}
+.actions {
+  display: flex;
+  align-items: stretch;
 }
 .value {
   min-width: 34px;
