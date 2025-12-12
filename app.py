@@ -6,12 +6,9 @@ import threading
 import time
 from flask import Flask, jsonify, render_template, request
 
-try:
-    import RPi.GPIO as GPIO
-
-    HW = True
-except ImportError:
-    HW = False  # Permite probar en PC
+# Modo dummy para tablet: no se usa GPIO aunque la librería exista
+GPIO = None
+HW = False
 
 app = Flask(__name__)
 
