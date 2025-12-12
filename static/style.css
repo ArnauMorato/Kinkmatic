@@ -195,6 +195,10 @@ main {
   main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+@media (min-width: 800px) {
+  .row.wrap { flex-wrap: nowrap; }
+}
+
 @media (max-width: 480px) {
   .btn { padding: 10px 12px; font-size: 16px; }
   .arrow { width: 48px; height: 48px; }
