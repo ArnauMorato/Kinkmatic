@@ -1,6 +1,7 @@
 """
 App Flask ligera para controlar dos relés (aire y electricidad) con cuenta atrás
 fiable y loops on/off. Frontend HTML/JS responsive y muy visual.
+En rama "tablet" funciona en modo dummy: no interactúa con GPIO, solo UI/estado.
 """
 import threading
 import time
@@ -12,7 +13,7 @@ HW = False
 
 app = Flask(__name__)
 
-# Configuración GPIO
+# Configuración GPIO (se ignora en modo dummy)
 DEVICES = {
     "air": {"pin": 18, "active_high": True, "label": "Aire", "icon": "🌬️"},
     "power": {"pin": 23, "active_high": True, "label": "Electricidad", "icon": "⚡"},
@@ -30,6 +31,7 @@ STATE = {
     for name in DEVICES
 }
 LOCK = threading.Lock()
+LOOP_START_DELAY = 3  # segundos de cuenta atrás previa en fondo amarillo
 
 
 def set_relay(device: str, closed: bool) -> None:
@@ -68,6 +70,27 @@ def run_countdown(device: str, duration: int) -> None:
 
 
 def run_loop(device: str, on_seconds: int, off_seconds: int, total_seconds: int) -> None:
+    # Fase previa: cuenta atrás amarilla antes de empezar el ciclo
+    pending_end = time.time() + LOOP_START_DELAY
+    with LOCK:
+        STATE[device].update(
+            mode="pending_loop",
+            total=LOOP_START_DELAY,
+            seconds_left=LOOP_START_DELAY,
+            phase="pending",
+            started_at=time.time(),
+        )
+    while True:
+        now = time.time()
+        with LOCK:
+            if STATE[device]["mode"] != "pending_loop":
+                break
+            STATE[device]["seconds_left"] = max(0, int(pending_end - now))
+        if now >= pending_end:
+            break
+        time.sleep(0.2)
+
+    # Fase de loop on/off
     end_ts = time.time() + total_seconds
     with LOCK:
         STATE[device].update(

@@ -127,11 +127,15 @@ async function poll() {
       if (!s) continue;
       const { indicator, counter, fill, statusBox, mode, startSingle, startLoop } = s.els;
       const active = st.mode !== "idle";
-      const closed = st.mode === "single" || (st.mode === "loop" && st.phase === "on");
+      const pending = st.mode === "pending_loop";
+      const closed = (!pending) && (st.mode === "single" || (st.mode === "loop" && st.phase === "on"));
 
       statusBox.classList.toggle("on", closed);
       statusBox.classList.toggle("off", !closed);
+      statusBox.classList.toggle("pending", pending);
       indicator.textContent = closed ? "Relé cerrado" : "Relé abierto";
+      if (pending) indicator.textContent = "Preparando loop";
+
       counter.textContent = active ? st.seconds_left : "";
       fill.style.width = `${st.percent || 0}%`;
       mode.textContent = active

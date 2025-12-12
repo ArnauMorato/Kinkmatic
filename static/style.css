@@ -33,18 +33,20 @@ body {
 
 main {
   display: grid;
-  gap: 18px;
-  padding: 16px;
+  gap: 12px;
+  padding: 12px;
+  max-width: 1100px;
+  margin: 0 auto 24px auto;
 }
 
 .card {
   background: var(--card);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: 12px;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .card-header {
@@ -59,11 +61,11 @@ main {
 }
 
 .status {
-  padding: 12px;
-  border-radius: 14px;
+  padding: 10px;
+  border-radius: 12px;
   background: #16202d;
   display: grid;
-  gap: 8px;
+  gap: 6px;
   text-align: center;
 }
 .indicator {
@@ -71,7 +73,7 @@ main {
   font-weight: 700;
 }
 .counter {
-  font-size: 64px;
+  font-size: 56px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -102,10 +104,10 @@ main {
 .block {
   background: #131c26;
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .block-title {
   font-size: 18px;
@@ -142,9 +144,9 @@ main {
   color: var(--text);
   border: 1px solid #2f3f55;
   border-radius: 10px;
-  padding: 14px 16px;
-  font-size: 20px;
-  min-width: 64px;
+  padding: 12px 14px;
+  font-size: 18px;
+  min-width: 58px;
   cursor: pointer;
   touch-action: manipulation;
   box-shadow: var(--shadow);
@@ -162,30 +164,30 @@ main {
   box-shadow: none;
 }
 .arrow {
-  width: 60px;
-  height: 60px;
+  width: 54px;
+  height: 54px;
   display: grid;
   place-items: center;
 }
 .value {
-  min-width: 36px;
+  min-width: 34px;
   text-align: center;
   font-weight: 700;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .status.on { background: var(--red); }
 .status.off { background: var(--green); }
+.status.pending { background: var(--yellow); color: #111; }
 
-@media (min-width: 768px) {
-  main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .counter { font-size: 80px; }
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
-  .btn { padding: 12px 14px; font-size: 18px; }
-  .arrow { width: 52px; height: 52px; }
-  .counter { font-size: 54px; }
-  .block { padding: 10px; }
+  .btn { padding: 10px 12px; font-size: 16px; }
+  .arrow { width: 48px; height: 48px; }
+  .counter { font-size: 48px; }
+  .block { padding: 8px; }
 }
 
