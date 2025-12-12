@@ -197,9 +197,7 @@ main {
   main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-@media (min-width: 800px) {
-  .row.wrap { flex-wrap: nowrap; }
-}
+/* Mantener wrap siempre para que no desborde en horizontal */
 
 @media (max-width: 480px) {
   .btn { padding: 10px 12px; font-size: 16px; }
