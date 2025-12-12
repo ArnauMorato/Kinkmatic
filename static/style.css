@@ -63,11 +63,11 @@ main {
 }
 
 .status {
-  padding: 10px;
+  padding: 14px;
   border-radius: 12px;
   background: #16202d;
   display: grid;
-  gap: 6px;
+  gap: 8px;
   text-align: center;
 }
 .indicator {
@@ -114,6 +114,12 @@ main {
 .block-title {
   font-size: 18px;
   font-weight: 700;
+}
+.block-title.with-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 .row {
   display: flex;
