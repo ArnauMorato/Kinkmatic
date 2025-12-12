@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de relés (lectura)</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 16px; line-height: 1.6; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    h2 { font-size: 20px; margin: 12px 0 6px; }
+    .device { margin-bottom: 16px; }
+    .status { padding: 8px; background: #f2f2f2; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Control de relés</h1>
+  <p>Vista simplificada apta para modo lectura.</p>
+  {% for name, dev in devices.items() %}
+    <section class="device" aria-label="{{ dev.label }}">
+      <h2>{{ dev.icon }} {{ dev.label }}</h2>
+      {% set st = state[name] %}
+      <div class="status">
+        <div><strong>Modo:</strong> {{ st.mode }}</div>
+        <div><strong>Fase:</strong> {{ st.phase if st.phase else "—" }}</div>
+        <div><strong>Tiempo restante total:</strong> {{ st.seconds_left }} s</div>
+        <div><strong>Tiempo restante fase:</strong> {{ st.phase_left }} s</div>
+      </div>
+    </section>
+  {% endfor %}
+  <p>Para control interactivo, usa la vista principal.</p>
+</body>
+</html>
+

@@ -166,6 +166,12 @@ def home():
     return render_template("index.html", devices=DEVICES)
 
 
+@app.route("/reader")
+def reader():
+    """Vista simplificada para modos de lectura (reader view)."""
+    return render_template("reader.html", devices=DEVICES, state=STATE)
+
+
 @app.route("/api/status")
 def api_status():
     payload = {}

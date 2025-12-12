@@ -135,6 +135,7 @@ main {
   color: var(--muted);
   margin-bottom: 6px;
 }
+.ctrl-label.sub { margin-top: 6px; }
 .ctrl-buttons {
   display: flex;
   align-items: center;
