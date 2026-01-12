@@ -29,10 +29,18 @@ if HW:
 
 # Estado
 STATE = {
-    name: {"mode": "idle", "seconds_left": 0, "total": 0, "phase": "", "started_at": 0.0}
+    name: {
+        "mode": "idle",           # idle | single | pending_loop | loop
+        "seconds_left": 0,        # tiempo restante total
+        "total": 0,               # total de la acción
+        "phase": "",              # pending | on | off
+        "phase_left": 0,          # tiempo restante de la fase actual
+        "started_at": 0.0,
+    }
     for name in DEVICES
 }
 LOCK = threading.Lock()
+LOOP_START_DELAY = 3  # segundos de cuenta atrás previa en fondo amarillo
 
 
 def set_relay(device: str, closed: bool) -> None:
@@ -52,6 +60,7 @@ def run_countdown(device: str, duration: int) -> None:
             seconds_left=duration,
             total=duration,
             phase="on",
+            phase_left=duration,
             started_at=time.time(),
         )
     set_relay(device, True)
@@ -62,15 +71,41 @@ def run_countdown(device: str, duration: int) -> None:
             if STATE[device]["mode"] != "single":
                 break
             STATE[device]["seconds_left"] = max(0, int(end_ts - now))
+            STATE[device]["phase_left"] = STATE[device]["seconds_left"]
         if now >= end_ts:
             break
         time.sleep(0.2)
     set_relay(device, False)
     with LOCK:
-        STATE[device].update(mode="idle", seconds_left=0, total=0, phase="", started_at=0.0)
+        STATE[device].update(
+            mode="idle", seconds_left=0, total=0, phase="", phase_left=0, started_at=0.0
+        )
 
 
 def run_loop(device: str, on_seconds: int, off_seconds: int, total_seconds: int) -> None:
+    # Fase previa: cuenta atrás amarilla antes de empezar el ciclo
+    pending_end = time.time() + LOOP_START_DELAY
+    with LOCK:
+        STATE[device].update(
+            mode="pending_loop",
+            total=LOOP_START_DELAY,
+            seconds_left=LOOP_START_DELAY,
+            phase="pending",
+            phase_left=LOOP_START_DELAY,
+            started_at=time.time(),
+        )
+    while True:
+        now = time.time()
+        with LOCK:
+            if STATE[device]["mode"] != "pending_loop":
+                break
+            STATE[device]["seconds_left"] = max(0, int(pending_end - now))
+            STATE[device]["phase_left"] = STATE[device]["seconds_left"]
+        if now >= pending_end:
+            break
+        time.sleep(0.2)
+
+    # Fase de loop on/off
     end_ts = time.time() + total_seconds
     with LOCK:
         STATE[device].update(
@@ -78,6 +113,7 @@ def run_loop(device: str, on_seconds: int, off_seconds: int, total_seconds: int)
             total=total_seconds,
             seconds_left=total_seconds,
             phase="on",
+            phase_left=on_seconds,
             started_at=time.time(),
         )
     while True:
@@ -89,14 +125,16 @@ def run_loop(device: str, on_seconds: int, off_seconds: int, total_seconds: int)
         if on_seconds > 0:
             with LOCK:
                 STATE[device]["phase"] = "on"
+                STATE[device]["phase_left"] = on_seconds
             set_relay(device, True)
             phase_end = min(end_ts, time.time() + on_seconds)
             while time.time() < phase_end:
                 with LOCK:
                     if STATE[device]["mode"] != "loop":
                         break
-                with LOCK:
-                    STATE[device]["seconds_left"] = max(0, int(end_ts - time.time()))
+                    now2 = time.time()
+                    STATE[device]["seconds_left"] = max(0, int(end_ts - now2))
+                    STATE[device]["phase_left"] = max(0, int(phase_end - now2))
                 time.sleep(0.2)
         with LOCK:
             if STATE[device]["mode"] != "loop":
@@ -105,25 +143,35 @@ def run_loop(device: str, on_seconds: int, off_seconds: int, total_seconds: int)
         if off_seconds > 0:
             with LOCK:
                 STATE[device]["phase"] = "off"
+                STATE[device]["phase_left"] = off_seconds
             set_relay(device, False)
             phase_end = min(end_ts, time.time() + off_seconds)
             while time.time() < phase_end:
                 with LOCK:
                     if STATE[device]["mode"] != "loop":
                         break
-                with LOCK:
-                    STATE[device]["seconds_left"] = max(0, int(end_ts - time.time()))
+                    now2 = time.time()
+                    STATE[device]["seconds_left"] = max(0, int(end_ts - now2))
+                    STATE[device]["phase_left"] = max(0, int(phase_end - now2))
                 time.sleep(0.2)
         if time.time() >= end_ts:
             break
     set_relay(device, False)
     with LOCK:
-        STATE[device].update(mode="idle", seconds_left=0, total=0, phase="", started_at=0.0)
+        STATE[device].update(
+            mode="idle", seconds_left=0, total=0, phase="", phase_left=0, started_at=0.0
+        )
 
 
 @app.route("/")
 def home():
     return render_template("index.html", devices=DEVICES)
+
+
+@app.route("/reader")
+def reader():
+    """Vista simplificada para modos de lectura (reader view)."""
+    return render_template("reader.html", devices=DEVICES, state=STATE)
 
 
 @app.route("/api/status")
@@ -140,6 +188,7 @@ def api_status():
                 "total": total,
                 "phase": st["phase"],
                 "percent": percent,
+                "phase_left": st.get("phase_left", 0),
             }
     return jsonify(payload)
 
@@ -171,6 +220,16 @@ def api_loop():
         if STATE[device]["mode"] != "idle":
             return jsonify({"ok": False, "msg": "Dispositivo ocupado"}), 409
     threading.Thread(target=run_loop, args=(device, on_s, off_s, total_s), daemon=True).start()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/stop", methods=["POST"])
+def api_stop():
+    with LOCK:
+        for name in STATE:
+            STATE[name].update(mode="idle", seconds_left=0, total=0, phase="", phase_left=0)
+    for name in STATE:
+        set_relay(name, False)
     return jsonify({"ok": True})
 
 

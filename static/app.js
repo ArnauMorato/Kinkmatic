@@ -1,5 +1,6 @@
 const cardsContainer = document.getElementById("cards");
 const tmpl = document.getElementById("card-template");
+const stopBtn = document.getElementById("stop-all");
 
 const state = {};
 
@@ -110,6 +111,14 @@ function createCard(key, meta) {
 
 Object.entries(DEVICES).forEach(([k, v]) => createCard(k, v));
 
+stopBtn.onclick = async () => {
+  try {
+    await fetch("/api/stop", { method: "POST" });
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 function renderClock() {
   const el = document.getElementById("clock");
   const now = new Date();
@@ -127,11 +136,19 @@ async function poll() {
       if (!s) continue;
       const { indicator, counter, fill, statusBox, mode, startSingle, startLoop } = s.els;
       const active = st.mode !== "idle";
-      const closed = st.mode === "single" || (st.mode === "loop" && st.phase === "on");
+      const pending = st.mode === "pending_loop";
+      const closed = (!pending) && (st.mode === "single" || (st.mode === "loop" && st.phase === "on"));
 
       statusBox.classList.toggle("on", closed);
       statusBox.classList.toggle("off", !closed);
-      indicator.textContent = closed ? "Relé cerrado" : "Relé abierto";
+      statusBox.classList.toggle("pending", pending);
+      const phaseLeft = st.phase_left || 0;
+      indicator.textContent = pending
+        ? `Preparando loop (${phaseLeft}s)`
+        : closed
+          ? `Relé cerrado (${phaseLeft}s fase)`
+          : `Relé abierto (${phaseLeft}s fase)`;
+
       counter.textContent = active ? st.seconds_left : "";
       fill.style.width = `${st.percent || 0}%`;
       mode.textContent = active
@@ -148,4 +165,3 @@ async function poll() {
 
 setInterval(poll, 300);
 poll();
-

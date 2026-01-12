@@ -21,8 +21,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  font-size: 22px;
+  gap: 10px;
+  padding: 12px 14px;
+  font-size: 20px;
   background: #0f141c;
   position: sticky;
   top: 0;
@@ -30,21 +31,24 @@ body {
 }
 .clock { font-variant-numeric: tabular-nums; }
 .title { font-weight: 700; letter-spacing: 0.5px; }
+.top-bar .btn { margin-left: auto; }
 
 main {
   display: grid;
-  gap: 18px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
+  max-width: 1100px;
+  margin: 0 auto 24px auto;
 }
 
 .card {
   background: var(--card);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: 12px;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .card-header {
@@ -59,8 +63,8 @@ main {
 }
 
 .status {
-  padding: 12px;
-  border-radius: 14px;
+  padding: 14px;
+  border-radius: 12px;
   background: #16202d;
   display: grid;
   gap: 8px;
@@ -71,7 +75,7 @@ main {
   font-weight: 700;
 }
 .counter {
-  font-size: 64px;
+  font-size: 56px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -102,14 +106,20 @@ main {
 .block {
   background: #131c26;
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .block-title {
   font-size: 18px;
   font-weight: 700;
+}
+.block-title.with-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 .row {
   display: flex;
@@ -123,18 +133,24 @@ main {
   background: #192331;
   border-radius: 10px;
   padding: 10px;
-  min-width: 140px;
+  min-width: 120px;
+  flex: 1 1 0;
 }
 .ctrl-label {
   font-size: 14px;
   color: var(--muted);
   margin-bottom: 6px;
 }
+.ctrl-label.sub { margin-top: 6px; }
 .ctrl-buttons {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 4px;
+}
+.ctrl-buttons.vertical {
+  flex-direction: column;
+  align-items: center;
 }
 
 .btn {
@@ -142,9 +158,9 @@ main {
   color: var(--text);
   border: 1px solid #2f3f55;
   border-radius: 10px;
-  padding: 14px 16px;
-  font-size: 20px;
-  min-width: 64px;
+  padding: 12px 14px;
+  font-size: 18px;
+  min-width: 58px;
   cursor: pointer;
   touch-action: manipulation;
   box-shadow: var(--shadow);
@@ -156,36 +172,50 @@ main {
   font-weight: 700;
   padding: 14px 20px;
 }
+.btn.danger {
+  background: #e11d48;
+  border-color: #e11d48;
+  font-weight: 800;
+}
 .btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
 }
 .arrow {
-  width: 60px;
-  height: 60px;
+  width: 54px;
+  height: 54px;
   display: grid;
   place-items: center;
 }
+.actions {
+  display: flex;
+  align-items: stretch;
+}
 .value {
-  min-width: 36px;
+  min-width: 34px;
   text-align: center;
   font-weight: 700;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .status.on { background: var(--red); }
 .status.off { background: var(--green); }
+.status.pending { background: var(--yellow); color: #111; }
 
-@media (min-width: 768px) {
-  main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .counter { font-size: 80px; }
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
 }
+
+@media (min-width: 900px) {
+  main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Mantener wrap siempre para que no desborde en horizontal */
 
 @media (max-width: 480px) {
-  .btn { padding: 12px 14px; font-size: 18px; }
-  .arrow { width: 52px; height: 52px; }
-  .counter { font-size: 54px; }
-  .block { padding: 10px; }
+  .btn { padding: 10px 12px; font-size: 16px; }
+  .arrow { width: 48px; height: 48px; }
+  .counter { font-size: 48px; }
+  .block { padding: 8px; }
 }
-
